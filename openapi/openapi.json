@@ -4543,6 +4543,34 @@
           "description": "resourceGroupName is the Resource Group for new Azure resources created for the cluster.",
           "type": "string",
           "default": ""
+        },
+        "resourceTags": {
+          "description": "resourceTags is a list of additional tags to apply to Azure resources created for the cluster. See https://docs.microsoft.com/en-us/rest/api/resources/tags for information on tagging Azure resources. Azure supports a maximum of 50 tags per resource except for few, which have limitation of 15 tags. OpenShift reserves 5 tags for its internal use, and allows 10 tags for user configuration.",
+          "type": "array",
+          "items": {
+            "default": {},
+            "$ref": "#/definitions/com.github.openshift.api.config.v1.AzureResourceTag"
+          }
+        }
+      }
+    },
+    "com.github.openshift.api.config.v1.AzureResourceTag": {
+      "description": "AzureResourceTag is a tag to apply to Azure resources created for the cluster.",
+      "type": "object",
+      "required": [
+        "key",
+        "value"
+      ],
+      "properties": {
+        "key": {
+          "description": "key is the key of the tag",
+          "type": "string",
+          "default": ""
+        },
+        "value": {
+          "description": "value is the value of the tag.",
+          "type": "string",
+          "default": ""
         }
       }
     },
