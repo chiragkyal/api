@@ -77,6 +77,15 @@ spec:
             description: ControlPlaneMachineSet represents the configuration of the
               ControlPlaneMachineSet.
             properties:
+              machineNamePrefix:
+                description: |-
+                  MachineNamePrefix is the prefix used when creating machine names.
+                  The prefix will be suffixed by a randomly generated string of 5 characters and the index of the machine.
+                  The prefix must not end with a special character, and only '-' is allowed in the middle.
+                maxLength: 20
+                minLength: 1
+                pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
+                type: string
               replicas:
                 default: 3
                 description: |-

@@ -18634,6 +18634,10 @@
         "template"
       ],
       "properties": {
+        "machineNamePrefix": {
+          "description": "MachineNamePrefix is the prefix used when creating machine names. The prefix will be suffixed by a randomly generated string of 5 characters and the index of the machine. The prefix must not end with a special character, and only '-' is allowed in the middle.",
+          "type": "string"
+        },
         "replicas": {
           "description": "Replicas defines how many Control Plane Machines should be created by this ControlPlaneMachineSet. This field is immutable and cannot be changed after cluster installation. The ControlPlaneMachineSet only operates with 3 or 5 node control planes, 3 and 5 are the only valid values for this field.",
           "type": "integer",

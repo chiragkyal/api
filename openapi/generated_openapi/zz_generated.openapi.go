@@ -32384,6 +32384,13 @@ func schema_openshift_api_machine_v1_ControlPlaneMachineSetSpec(ref common.Refer
 				Description: "ControlPlaneMachineSet represents the configuration of the ControlPlaneMachineSet.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
+					"machineNamePrefix": {
+						SchemaProps: spec.SchemaProps{
+							Description: "MachineNamePrefix is the prefix used when creating machine names. The prefix will be suffixed by a randomly generated string of 5 characters and the index of the machine. The prefix must not end with a special character, and only '-' is allowed in the middle.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 					"state": {
 						SchemaProps: spec.SchemaProps{
 							Description: "State defines whether the ControlPlaneMachineSet is Active or Inactive. When Inactive, the ControlPlaneMachineSet will not take any action on the state of the Machines within the cluster. When Active, the ControlPlaneMachineSet will reconcile the Machines and will update the Machines as necessary. Once Active, a ControlPlaneMachineSet cannot be made Inactive. To prevent further action please remove the ControlPlaneMachineSet.",
