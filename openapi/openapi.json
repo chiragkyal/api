@@ -18635,7 +18635,7 @@
       ],
       "properties": {
         "machineNamePrefix": {
-          "description": "MachineNamePrefix is the prefix used when creating machine names. The prefix will be suffixed by a randomly generated string of 5 characters and the index of the machine. The prefix must not end with a special character, and only '-' is allowed in the middle.",
+          "description": "MachineNamePrefix is the prefix used when creating machine names. Each machine name will consist of this prefix, followed by a randomly generated string of 5 characters, and an index of the machine. The prefix must not end with a special character, and only lowercase alphanumeric characters and hyphens ('-') are allowed, with hyphens permitted only between characters. The prefix must be between 1 and 32 characters in length.",
           "type": "string"
         },
         "replicas": {

@@ -32386,7 +32386,7 @@ func schema_openshift_api_machine_v1_ControlPlaneMachineSetSpec(ref common.Refer
 				Properties: map[string]spec.Schema{
 					"machineNamePrefix": {
 						SchemaProps: spec.SchemaProps{
-							Description: "MachineNamePrefix is the prefix used when creating machine names. The prefix will be suffixed by a randomly generated string of 5 characters and the index of the machine. The prefix must not end with a special character, and only '-' is allowed in the middle.",
+							Description: "MachineNamePrefix is the prefix used when creating machine names. Each machine name will consist of this prefix, followed by a randomly generated string of 5 characters, and an index of the machine. The prefix must not end with a special character, and only lowercase alphanumeric characters and hyphens ('-') are allowed, with hyphens permitted only between characters. The prefix must be between 1 and 32 characters in length.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
