@@ -219,6 +219,14 @@ var (
 						enableIn(configv1.DevPreviewNoUpgrade, configv1.TechPreviewNoUpgrade).
 						mustRegister()
 
+	FeatureGateCMPSMachineNamePrefix = newFeatureGate("CMPSMachineNamePrefix").
+						reportProblemsToJiraComponent("cloud-provider").
+						contactPerson("chiragkyal").
+						productScope(ocpSpecific).
+						enhancementPR("https://github.com/openshift/enhancements/pull/1111111"). // TODO
+						enableIn(configv1.DevPreviewNoUpgrade, configv1.TechPreviewNoUpgrade).
+						mustRegister()
+
 	FeatureGateAdminNetworkPolicy = newFeatureGate("AdminNetworkPolicy").
 					reportProblemsToJiraComponent("Networking/ovn-kubernetes").
 					contactPerson("tssurya").
