@@ -167,7 +167,7 @@ spec:
                     description: |-
                       driverType indicates type of CSI driver for which the
                       driverConfig is being applied to.
-                      Valid values are: AWS, Azure, GCP, IBMCloud, vSphere and omitted.
+                      Valid values are: AWS, Azure, GCP, IBMCloud, vSphere, SecretsStore and omitted.
                       Consumers should treat unknown values as a NO-OP.
                     enum:
                     - ""
@@ -176,6 +176,7 @@ spec:
                     - GCP
                     - IBMCloud
                     - vSphere
+                    - SecretsStore
                     type: string
                   gcp:
                     description: gcp is used to configure the GCP CSI driver.
@@ -241,6 +242,62 @@ spec:
                     required:
                     - encryptionKeyCRN
                     type: object
+                  secretsStore:
+                    description: secretsStore is used to configure the Secrets Store
+                      CSI driver.
+                    properties:
+                      secretRotation:
+                        description: |-
+                          secretRotation controls automatic secret rotation behavior.
+                          When omitted, secret rotation is enabled with a default poll interval of 2 minutes.
+                        properties:
+                          enabled:
+                            default: true
+                            description: |-
+                              enabled controls whether automatic secret rotation is active.
+                              When true, the CSIDriver object sets requiresRepublish and the driver
+                              re-fetches secrets from providers.
+                              When false, secrets are only fetched at initial pod mount time.
+                              Default is true.
+                            type: boolean
+                          rotationPollInterval:
+                            default: 2m
+                            description: |-
+                              rotationPollInterval is the minimum duration between secret rotation attempts.
+                              The driver skips provider calls if less than this interval has elapsed since
+                              the last successful rotation. Format is a Go duration string (e.g. "2m", "1h30m").
+                              Default is "2m".
+                            pattern: ^([0-9]+(\.[0-9]+)?(s|m|h))+$
+                            type: string
+                        type: object
+                      tokenRequests:
+                        description: |-
+                          tokenRequests specifies service account token audiences that kubelet will provide
+                          to the CSI driver during NodePublishVolume calls. These tokens enable workload
+                          identity federation (WIF) with cloud providers such as AWS, Azure, and GCP.
+                          An empty audience string means the token uses the kube-apiserver's default APIAudiences.
+                        items:
+                          description: |-
+                            SecretsStoreTokenRequest specifies a service account token audience configuration
+                            for workload identity federation (WIF) with the Secrets Store CSI driver.
+                          properties:
+                            audience:
+                              description: |-
+                                audience is the intended audience of the service account token.
+                                An empty string means the issued token will use the kube-apiserver's default APIAudiences.
+                              type: string
+                            expirationSeconds:
+                              description: |-
+                                expirationSeconds is the requested duration of validity of the service account token.
+                                The token issuer may return a token with a different validity duration.
+                              format: int64
+                              type: integer
+                          required:
+                          - audience
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                    type: object
                   vSphere:
                     description: vSphere is used to configure the vsphere CSI driver.
                     properties:
@@ -293,6 +350,10 @@ spec:
                     unset otherwise
                   rule: 'has(self.driverType) && self.driverType == ''IBMCloud'' ?
                     has(self.ibmcloud) : !has(self.ibmcloud)'
+                - message: secretsStore must be set if driverType is 'SecretsStore',
+                    but remain unset otherwise
+                  rule: 'has(self.driverType) && self.driverType == ''SecretsStore''
+                    ? has(self.secretsStore) : !has(self.secretsStore)'
               logLevel:
                 default: Normal
                 description: |-

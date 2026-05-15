@@ -113,25 +113,27 @@ type ClusterCSIDriverSpec struct {
 }
 
 // CSIDriverType indicates type of CSI driver being configured.
-// +kubebuilder:validation:Enum="";AWS;Azure;GCP;IBMCloud;vSphere
+// +kubebuilder:validation:Enum="";AWS;Azure;GCP;IBMCloud;vSphere;SecretsStore
 type CSIDriverType string
 
 const (
-	AWSDriverType      CSIDriverType = "AWS"
-	AzureDriverType    CSIDriverType = "Azure"
-	GCPDriverType      CSIDriverType = "GCP"
-	IBMCloudDriverType CSIDriverType = "IBMCloud"
-	VSphereDriverType  CSIDriverType = "vSphere"
+	AWSDriverType          CSIDriverType = "AWS"
+	AzureDriverType        CSIDriverType = "Azure"
+	GCPDriverType          CSIDriverType = "GCP"
+	IBMCloudDriverType     CSIDriverType = "IBMCloud"
+	VSphereDriverType      CSIDriverType = "vSphere"
+	SecretsStoreDriverType CSIDriverType = "SecretsStore"
 )
 
 // CSIDriverConfigSpec defines configuration spec that can be
 // used to optionally configure a specific CSI Driver.
 // +kubebuilder:validation:XValidation:rule="has(self.driverType) && self.driverType == 'IBMCloud' ? has(self.ibmcloud) : !has(self.ibmcloud)",message="ibmcloud must be set if driverType is 'IBMCloud', but remain unset otherwise"
+// +kubebuilder:validation:XValidation:rule="has(self.driverType) && self.driverType == 'SecretsStore' ? has(self.secretsStore) : !has(self.secretsStore)",message="secretsStore must be set if driverType is 'SecretsStore', but remain unset otherwise"
 // +union
 type CSIDriverConfigSpec struct {
 	// driverType indicates type of CSI driver for which the
 	// driverConfig is being applied to.
-	// Valid values are: AWS, Azure, GCP, IBMCloud, vSphere and omitted.
+	// Valid values are: AWS, Azure, GCP, IBMCloud, vSphere, SecretsStore and omitted.
 	// Consumers should treat unknown values as a NO-OP.
 	// +required
 	// +unionDiscriminator
@@ -156,6 +158,10 @@ type CSIDriverConfigSpec struct {
 	// vSphere is used to configure the vsphere CSI driver.
 	// +optional
 	VSphere *VSphereCSIDriverConfigSpec `json:"vSphere,omitempty"`
+
+	// secretsStore is used to configure the Secrets Store CSI driver.
+	// +optional
+	SecretsStore *SecretsStoreCSIDriverConfigSpec `json:"secretsStore,omitempty"`
 }
 
 // AWSCSIDriverConfigSpec defines properties that can be configured for the AWS CSI driver.
@@ -387,6 +393,59 @@ type VSphereCSIDriverConfigSpec struct {
 	// +openshift:enable:FeatureGate=VSphereConfigurableMaxAllowedBlockVolumesPerNode
 	// +optional
 	MaxAllowedBlockVolumesPerNode int32 `json:"maxAllowedBlockVolumesPerNode,omitempty"`
+}
+
+// SecretsStoreCSIDriverConfigSpec defines properties that can be configured for the Secrets Store CSI driver.
+type SecretsStoreCSIDriverConfigSpec struct {
+	// secretRotation controls automatic secret rotation behavior.
+	// When omitted, secret rotation is enabled with a default poll interval of 2 minutes.
+	// +optional
+	SecretRotation *SecretsStoreSecretRotation `json:"secretRotation,omitempty"`
+
+	// tokenRequests specifies service account token audiences that kubelet will provide
+	// to the CSI driver during NodePublishVolume calls. These tokens enable workload
+	// identity federation (WIF) with cloud providers such as AWS, Azure, and GCP.
+	// An empty audience string means the token uses the kube-apiserver's default APIAudiences.
+	// +optional
+	// +listType=atomic
+	TokenRequests []SecretsStoreTokenRequest `json:"tokenRequests,omitempty"`
+}
+
+// SecretsStoreSecretRotation configures the automatic secret rotation behavior
+// for the Secrets Store CSI driver.
+type SecretsStoreSecretRotation struct {
+	// enabled controls whether automatic secret rotation is active.
+	// When true, the CSIDriver object sets requiresRepublish and the driver
+	// re-fetches secrets from providers.
+	// When false, secrets are only fetched at initial pod mount time.
+	// Default is true.
+	// +kubebuilder:default=true
+	// +optional
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// rotationPollInterval is the minimum duration between secret rotation attempts.
+	// The driver skips provider calls if less than this interval has elapsed since
+	// the last successful rotation. Format is a Go duration string (e.g. "2m", "1h30m").
+	// Default is "2m".
+	// +kubebuilder:default="2m"
+	// +kubebuilder:validation:Pattern=`^([0-9]+(\.[0-9]+)?(s|m|h))+$`
+	// +kubebuilder:validation:Type:=string
+	// +optional
+	RotationPollInterval *metav1.Duration `json:"rotationPollInterval,omitempty"`
+}
+
+// SecretsStoreTokenRequest specifies a service account token audience configuration
+// for workload identity federation (WIF) with the Secrets Store CSI driver.
+type SecretsStoreTokenRequest struct {
+	// audience is the intended audience of the service account token.
+	// An empty string means the issued token will use the kube-apiserver's default APIAudiences.
+	// +required
+	Audience string `json:"audience"`
+
+	// expirationSeconds is the requested duration of validity of the service account token.
+	// The token issuer may return a token with a different validity duration.
+	// +optional
+	ExpirationSeconds *int64 `json:"expirationSeconds,omitempty"`
 }
 
 // ClusterCSIDriverStatus is the observed status of CSI driver operator
